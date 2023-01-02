@@ -2,6 +2,23 @@ from django.db import models
 from django.contrib.auth.models import UserManager
 from django.contrib.auth.hashers import make_password
 
+lgas = [
+    ("Anka", "Anka"),
+    ("Bakura", "Bakura"),
+    ("Birnin Magaji", "Birnin Magaji"),
+    ("Bukkuyum", "Bukkuyum"),
+    ("Bungudu", "Bungudu"),
+    ("Tsafe", "Tsafe"),
+    ("Gummi", "Gummi"),
+    ("Gusau", "Gusau"),
+    ("Kaura Namoda", "Kaura Namoda"),
+    ("Maradun", "Maradun"),
+    ("Maru", "Maru"),
+    ("Shinkafi", "Shinkafi"),
+    ("Talata Mafara", "Talata Mafara"),
+    ("Zurmi", "Zurmi"),
+]
+
 # Create your models here.
 class CustomUserManager(UserManager):
     def _create_user(self, email, password, **extra_fields):
@@ -49,3 +66,31 @@ class Agent(models.Model):
     
     def __str__(self):
         return self.name 
+
+
+class LocalGovernment(models.Model):
+    name = models.CharField(max_length=100, null=False, blank=False, choices=lgas, unique=True)
+
+
+class PollingUnit(models.Model):
+    name = models.CharField(max_length=100, null=False, blank=False)
+    pu_id = models.CharField(max_length=100, null=False, blank=False)
+    agent = models.ForeignKey(Agent, related_name="pu", on_delete=models.CASCADE)
+    local_government = models.CharField(max_length=50, null=False, blank=False, choices=lgas)
+
+
+class Ward(models.Model):
+    name = models.CharField(max_length=100, null=False, blank=False)
+    polling_units = models.ManyToManyField(PollingUnit, related_name="ward")
+    local_government = models.CharField(max_length=50, null=False, blank=False, choices=lgas)
+
+
+class Result(models.Model):
+    polling_unit = models.ForeignKey(PollingUnit, related_name="result", on_delete=models.CASCADE)
+    accredited_votes = models.FloatField(default=0, null=True, blank=True)
+    casted_votes =models.FloatField(default=0, null=True, blank=True)
+    valid = models.FloatField(default=0, null=True, blank=True)
+    rejected = models.FloatField(default=0, null=True, blank=True)
+    apc_result = models.FloatField(default=0, null=True, blank=True)
+    pdp_result = models.FloatField(default=0, null=True, blank=True)
+    other_result = models.FloatField(default=0, null=True, blank=True)
